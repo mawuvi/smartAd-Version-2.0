@@ -1,332 +1,109 @@
-# SmartAd Project Rules
-**Project:** SmartAd - Advertising Campaign Management System  
-**Version:** 1.0  
-**Date:** 2025-01-08  
+# SMARTAD DEVELOPMENT STANDARDS
 
----
+## 🏗️ ARCHITECTURE PATTERNS
 
-## 🗄️ SQL Rules — MariaDB 10.4.x (MySQL Compatible)
+### MVC Structure Strict Enforcement
+- Controllers: Thin, only handle HTTP logic, validation, and response formatting
+- Models: Business logic, database operations, data validation
+- Views: Presentation only, minimal PHP logic
+- Services: Complex business operations that span multiple models
 
-### General Style
-- Use lowercase for SQL keywords and identifiers where possible
-- Terminate every statement with a semicolon
-- Use backticks (`) around identifiers only when needed (reserved words or special chars)
+### Department-First Architecture
+- All new features must consider multi-department scalability
+- Use department context in all database queries
+- Implement role-based access control from foundation
 
-### Naming Conventions
-- Use snake_case for all identifiers (tables, columns, indexes, constraints)
-- Prefix foreign keys as fk_<table>_<reference>
-- Prefix indexes as idx_<table>_<column>
-- Avoid spaces, hyphens, and uppercase letters in identifiers
+## 🔒 SECURITY PROTOCOLS
 
-### ALTER / Migration Order
-**CRITICAL:** Always follow this order for structural changes:
-1️⃣ Drop FOREIGN KEYS
-2️⃣ Drop INDEXES  
-3️⃣ Drop or modify COLUMNS
-(Reverse when creating: columns → indexes → foreign keys)
+### Database Security
+- ALWAYS use prepared statements with parameter binding
+- NEVER concatenate variables directly into SQL queries
+- Validate all user input before database operations
+- Use PHP Data Objects (PDO) for all database interactions
 
-**MariaDB 10.4 Limitations:**
-- MariaDB 10.4 does NOT support "IF EXISTS" with DROP FOREIGN KEY
-- Before dropping, check: `SELECT CONSTRAINT_NAME FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = '<table>';`
-- "IF EXISTS" for DROP COLUMN is supported (MariaDB ≥10.3.2)
-- "IF EXISTS" for DROP INDEX is NOT supported before 10.5 — omit it
-
-### Foreign Key & Integrity Rules
-- Always define explicit ON DELETE / ON UPDATE behavior
-- Default pattern: ON DELETE CASCADE for ownership dependencies, ON DELETE SET NULL for optional links
-- Foreign key columns must exactly match data type and charset of referenced columns
-- Do not add a foreign key unless data integrity has been verified (no orphan rows)
-
-### Indexing Rules
-- Index names must clearly describe their purpose
-- Avoid redundant indexes (a foreign key already creates an implicit index)
-- For multi-column indexes, order columns by selectivity (most unique first)
-
-### Data Safety
-- Always back up data before destructive operations
-- Recommended quick backup: `CREATE TABLE <table>_backup LIKE <table>; INSERT INTO <table>_backup SELECT * FROM <table>;`
-- Comment a checkpoint above every DROP or TRUNCATE: `-- Confirm backup before execution.`
-
-### Schema Inspection
-- Use `SHOW CREATE TABLE <table>;` to verify structure after any migration
-- Use information_schema queries for cross-table audits: `SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE();`
-
-### Script Header
-Every migration script must begin with:
-```sql
--- =====================================================
--- <Short Description>
--- Date: <YYYY-MM-DD>
--- Purpose: <Summary of Change>
--- =====================================================
-```
-
----
-
-## 🏗️ Project Architecture Rules
-
-### Directory Structure (MANDATORY)
-```
-C:\xampp\htdocs\SmartAd\
-├── app\                    ← Non-public business logic
-│   ├── api\               ← Protected API endpoints
-│   ├── models\            ← Database query logic
-│   ├── pages\             ← Protected PHP pages (post-login)
-│   └── views\             ← Presentation-only templates
-├── public\                ← Webroot (exposed to browser)
-│   ├── css\               ← Static stylesheets
-│   │   ├── components\    ← Reusable UI components
-│   │   └── pages\         ← Page-specific styles
-│   ├── js\                ← JavaScript files
-│   │   ├── modules\       ← Reusable JavaScript modules
-│   │   └── pages\         ← Page-specific scripts
-│   └── public_pages\      ← Public pages (login, register, forgot-password)
-├── smartAdVault\          ← Secure folder (protected by .htaccess)
-│   ├── auth\              ← Authentication & RBAC modules
-│   ├── config\            ← Configuration files
-│   ├── helpers\           ← Helper utilities
-│   └── logs\              ← Application logs
-└── database\              ← Database schemas and migrations
-```
-
-### File Categorization Rules
-**CRITICAL:** When creating new files:
-1. **Static assets** → `public/css`, `public/js`, `public/assets`
-2. **Public pages** → `public/public_pages/`
-3. **Protected APIs** → `app/api/` (routed via `/api/`)
-4. **Public APIs** (login/logout only) → `public/` (bypasses AuthGuard)
-5. **Protected pages** → `app/pages/`
-6. **Presentation templates** → `app/views/`
-7. **Database models** → `app/models/`
-8. **Reusable services** → `app/services/`
-9. **Helpers** → `smartAdVault/helpers/` (NEVER in public or app)
-10. **Configs & API keys** → `smartAdVault/config/`
-11. **JavaScript modules** → `public/js/modules/`
-12. **Database migrations** → `database/migrations/`
-
-### Authentication Enforcement
-**MANDATORY:** Every PHP file (API or page) must begin with:
+### Input Validation Standards
 ```php
-require_once __DIR__ . '/../bootstrap.php';
-```
+// REQUIRED PATTERN:
+$user_id = filter_var($_POST['user_id'], FILTER_VALIDATE_INT);
+if ($user_id === false || $user_id <= 0) {
+    throw new InvalidArgumentException('Invalid user ID');
+}
 
-**Public Whitelist (no AuthGuard):**
-- `public_pages/login.php`
-- `public_pages/register.php` 
-- `public_pages/forgot_password.php`
-- `api_login.php`
-- `api_logout.php`
-- `index.php`
+## 💾 DATABASE STANDARDS
 
-**All other files are protected by default.**
+### Query Optimization
+- Always index foreign keys and frequently searched columns
+- Use EXPLAIN on complex queries during development
+- Implement pagination for large datasets
+- Cache frequently accessed, rarely changed data
 
----
+### Data Consistency
+- Use transactions for multi-table operations
+- Implement soft deletes where appropriate
+- Maintain audit trails for critical operations
 
-## 🗄️ Database Rules
+## 🎯 PHP DEVELOPMENT STANDARDS
 
-### Schema Verification (MANDATORY)
-**CRITICAL RULE:** Before working on ANY interface that interacts with the database:
-1. **Check MasterSchema.md FIRST** - Always consult MasterSchema.md for current database structure
-2. **MasterSchema.md is the single source of truth** - All database schema information must be verified against this document
-3. **Get current table structure** - Use `DESCRIBE table_name` or `SHOW CREATE TABLE table_name`
-4. **Verify all required columns exist** - Check that all fields referenced in code exist in the database
-5. **Check data types match** - Ensure column types match what the code expects
-6. **Verify foreign key constraints** - Check that referenced tables and columns exist
+### Error Handling
+```php
+// Use exceptions for business logic errors
+try {
+    $calculator = new RateCalculator();
+    $result = $calculator->calculate($input);
+} catch (ValidationException $e) {
+    // Handle user input errors
+    return json_encode(['error' => $e->getMessage()]);
+} catch (CalculationException $e) {
+    // Handle business logic errors
+    error_log("Calculation failed: " . $e->getMessage());
+    return json_encode(['error' => 'Calculation service unavailable']);
+}
 
-**Required Commands:**
-```sql
--- Check table structure
-DESCRIBE bookings;
-DESCRIBE clients;
-DESCRIBE rates;
+## 🔄 DATA FETCHING STRATEGY
 
--- Check specific columns
-SHOW COLUMNS FROM bookings LIKE 'subtotal';
-SHOW COLUMNS FROM bookings LIKE 'discount_%';
-```
+### Hybrid Loading Pattern (REQUIRED)
+```php
+// Dashboard loads static data
+public function dashboard() {
+    $data['static_options'] = $this->options_model->getStaticOptions();
+    $this->load->view('dashboard', $data);
+}
 
-### MariaDB/MySQL Compatibility
-**CRITICAL RULE:** All SQL statements MUST be compatible with MariaDB 10.4.32 and MySQL 8.0+:
-- **NO `ALTER TABLE IF EXISTS`** - MariaDB does not support `IF EXISTS` clause for `ALTER TABLE`
-- **Use `CREATE TABLE IF NOT EXISTS`** - Only for table creation
-- **Use `DROP TABLE IF EXISTS`** - Only for table dropping
-- **For column additions**: Check existence first, then add if missing
-- **For index additions**: Use `CREATE INDEX IF NOT EXISTS` (MySQL 8.0+) or check existence first
+// Modal fetches dynamic data via AJAX
+public function get_modal_data() {
+    $dynamic_data = $this->rates_model->getCurrentRates();
+    header('Content-Type: application/json');
+    echo json_encode($dynamic_data);
+}
 
-### API Endpoint Accessibility
-**CRITICAL RULE:** All API endpoints MUST be accessible via clean routing:
-- **Use `/app/api/` structure** - Business logic APIs in protected directory outside webroot
-- **Route via .htaccess** - All `/api/` requests routed to `app/api/` via `RewriteRule ^api/(.*)$ ../app/api/$1 [L]`
-- **Clean URLs** - JavaScript calls use `BASE_URL + '/api/endpoint.php'`
-- **Security first** - APIs protected from direct access, preventing HTML contamination in JSON responses
+### Routing Structure
+- Base routes: /{department}/feature
+- Department detection from URL or user session
+- Fallback to default department when unspecified
 
----
+## 🧪 TESTING & QUALITY
 
-## 🎨 Frontend Development Rules
+### Development Testing
+- Test all calculator edge cases
+- Verify department isolation works correctly
+- Test with large datasets for performance
+- Validate all user input scenarios
 
-### CSS Centralization (MANDATORY)
-- **All CSS centralized** in `/public/css/` with GitHub-inspired design principles
-- **Inline CSS prohibited** except for dynamic runtime overrides
-- **Common UI components** reuse shared GitHub-style patterns
-- **Modal system** for confirmations and alerts with GitHub-quality interactions
-- **Navigation interfaces** use GitHub-inspired sidebar patterns with collapsible groups
+### Code Quality Checks
+- No commented-out code in commits
+- Meaningful commit messages
+- Update documentation when changing features
+- Peer review for critical functionality
 
-### GitHub-Inspired Design Standards
-- **Typography**: Clear hierarchy, appropriate weights, letter-spacing
-- **Color palette**: Subtle backgrounds, clear active states, professional contrast
-- **Spacing**: Generous whitespace principles for visual comfort
-- **Micro-interactions**: Smooth transitions (150ms cubic-bezier easing)
-- **Focus states**: Clear keyboard navigation indicators (2px solid #0969da)
+## 🚀 PERFORMANCE RULES
 
-### Module-by-Module Implementation
-- **Design system evolves module-by-module** with focused refinement
-- **Each module extends** and perfects the GitHub-inspired theme
-- **Setup module** serves as reference implementation
-- **Subsequent modules** extend proven patterns without deviation
-- **No scope creep** - complete current module before moving to next
+### Critical Performance Requirements
+- Dashboard load time under 2 seconds
+- Modal AJAX responses under 500ms
+- Database queries optimized with indexes
+- Implement caching for rate calculations
 
-### Module Header Standards
-- **All modules must use** `.module-header` container for consistent centering
-- **Module titles wrapped** in `.module-header-content` for compact blue-themed boxes
-- **Maximum width** of 600px for module title boxes
-- **Responsive design** ensures proper scaling on mobile devices
-
-### JavaScript Architecture
-- **ES6+ Standards**: Use modern JavaScript features (arrow functions, async/await, destructuring)
-- **Module Pattern**: Organize code into reusable modules with clear APIs
-- **State Management**: Implement proper state management for complex interactions
-- **Error Handling**: Comprehensive try-catch blocks with user-friendly error messages
-- **API Integration**: Standardized fetch wrapper with consistent error handling
-
----
-
-## 🚫 Critical "DO NOT" Rules
-
-### Database
-- **NEVER use `ALTER TABLE IF EXISTS`** - MariaDB 10.4.32 doesn't support it
-- **NEVER skip schema verification** - Always check MasterSchema.md first
-- **NEVER create foreign keys** without verifying data integrity
-- **NEVER drop tables** without backup confirmation
-
-### File Structure
-- **NEVER create files** outside proper directories per categorization rules
-- **NEVER put helpers** in public or app directories
-- **NEVER put configs** in public directories
-- **NEVER skip AuthGuard** except for whitelisted files
-
-### Frontend
-- **NEVER use inline CSS** except for dynamic runtime overrides
-- **NEVER create duplicate components** - reuse existing patterns
-- **NEVER skip responsive design** - mobile-first approach required
-- **NEVER ignore accessibility** - WCAG AA compliance mandatory
-
-### Security
-- **NEVER expose sensitive data** in error messages
-- **NEVER skip input validation** before database operations
-- **NEVER store passwords** in plain text
-- **NEVER bypass authentication** except for whitelisted endpoints
-
----
-
-## 📋 Pre-Implementation Checklist
-
-**MANDATORY:** Before implementing ANY feature or modification:
-
-### Database Schema Verification
-- [ ] Check if table exists using `glob_file_search` for migration files
-- [ ] Read actual table schema from migration files before planning changes
-- [ ] Verify column names, types, and constraints match MasterSchema.md
-- [ ] Check for existing indexes and foreign keys before adding new ones
-
-### Existing Code Pattern Discovery
-- [ ] Use `codebase_search` to find similar implementations before creating new code
-- [ ] Check for existing helper functions in `smartAdVault/helpers/` directory
-- [ ] Verify if API endpoints already exist before creating duplicates
-- [ ] Read functions you plan to modify to understand current implementation
-
-### Integration Point Verification
-- [ ] List directory contents to discover available helpers and utilities
-- [ ] Check existing audit logging patterns before implementing new logging
-- [ ] Verify authentication patterns used in similar API endpoints
-- [ ] Review existing validation logic before adding new validations
-
-### Standards Compliance Check
-- [ ] Verify file location follows categorization rules
-- [ ] Check CSS centralization requirements for UI changes
-- [ ] Confirm JavaScript follows module pattern standards
-- [ ] Ensure database queries are MariaDB 10.4.32+ compatible
-
----
-
-## 🔧 Key Business Rules
-
-### Rate Management
-- **Rate ID mandatory** for all bookings - no null values allowed
-- **Same publication different rates** allowed for different combinations
-- **Duplicate detection** based on: publication + ad_category + ad_size + page_position + color_type + effective_from
-- **Smart dependency resolution**: 100% exact matches auto-use existing, 0% matches auto-create, fuzzy matches fail
-
-### Client Management
-- **Draft limit enforcement** per client (configurable, default: 1)
-- **Client credit tracking** with limits and usage monitoring
-- **Soft deletes** implemented using `deleted_at` columns
-
-### Staging & Bulk Upload
-- **Staging data associated** with user account (uploaded_by) for multi-device access
-- **Processed staging rows** automatically deleted after successful rate creation
-- **Staging data older than 48 hours** automatically purged
-- **Binary logic**: Only 0% (new) or 100% (exact match) pass validation
-
-### Audit & Logging
-- **Comprehensive audit trail** for all user actions and permission checks
-- **Session timeout** tracked as logout with "SessionOut" remark
-- **All CRUD operations** logged with before/after values
-- **Audit trail preserved** before staging data deletion
-
----
-
-## 📊 Performance Standards
-
-### Database
-- **API response time** under 500ms for standard operations
-- **Database queries** optimized with views and stored procedures
-- **Pagination** implemented for large datasets (20 items per page default)
-- **Index usage** monitored regularly
-
-### Frontend
-- **Page load time** under 2 seconds
-- **Smooth animations** 60fps with CSS transitions
-- **Responsive interactions** UI responds within 100ms
-- **Lazy loading** for data that's not immediately needed
-
----
-
-## 🎯 Current Status
-
-### Completed ✅
-- Complete system restoration with enhanced database
-- Secure directory structure created
-- Authentication system implemented
-- Complete database schema with views and procedures
-- Security refactoring completed
-- Setup module complete with GitHub-inspired design
-- Rate management with bulk upload and staging
-- Client management with credit tracking
-- Audit logging system
-
-### In Progress 🔄
-- System testing and validation
-- Performance optimization verification
-
-### Next Steps 📋
-- Apply GitHub-inspired design system to remaining modules
-- Dashboard navigation refinement
-- Reports interface styling
-- User management pages
-- Advanced reporting system
-
----
-
-**End of SmartAd Project Rules**
-
-*This file contains the distilled wisdom and critical rules for the SmartAd project. Always consult MasterProject.md and MasterSchema.md for detailed specifications.*
+### Monitoring Requirements
+- Log slow database queries (>100ms)
+- Monitor AJAX response times
+- Track department-specific usage patterns
