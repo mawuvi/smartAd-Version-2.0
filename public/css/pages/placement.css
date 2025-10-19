@@ -1,0 +1,23 @@
+/* /public/css/pages/placement.css */
+/* All CSS from the original <style> block is here. */
+/* I also added utility classes to replace the inline styles. */
+
+.placement-title {
+    color: #8b5cf6;
+}
+
+.placement-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.status-ready {
+    background: #d1fae5;
+    color: #065f46;
+}
+.status-scheduled {
+    background: #dbeafe;
+    color: #1e40af;
+}

@@ -1,0 +1,6 @@
+# Deny direct browser access but allow internal server rewrites.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{THE_REQUEST} \ /app/ [NC]
+    RewriteRule .* - [F]
+</IfModule>

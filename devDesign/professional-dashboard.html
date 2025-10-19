@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>smartAd - Professional Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #7c3aed;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --dark-bg: #1e293b;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-bg);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        
+        .sidebar-brand .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        
+        .sidebar.collapsed .brand-text {
+            display: none;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            margin: 0.25rem 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-icon {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .nav-icon {
+            margin-right: 0;
+        }
+        
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar.collapsed ~ .main-content {
+            margin-left: 60px;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header-search {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+        
+        .search-input {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            width: 100%;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .user-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            background: var(--light-bg);
+        }
+        
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .dashboard-card.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .dashboard-card.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .dashboard-card.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+        
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0 1rem;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .footer-section h5 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .newsletter-input {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+        
+        .newsletter-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-search {
+                margin: 0 1rem;
+            }
+            
+            .content-area {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <div class="logo">📊</div>
+                <div class="brand-text">
+                    <strong>smartAd</strong>
+                </div>
+            </a>
+            <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+                <span class="d-none d-md-inline">◀</span>
+                <span class="d-md-none">☰</span>
+            </button>
+        </div>
+        
+        <div class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Bookings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Clients</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Rates</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="d-flex align-items-center">
+                <h1 class="h4 mb-0">Dashboard</h1>
+            </div>
+            
+            <div class="header-search">
+                <input type="search" class="search-input" placeholder="Search bookings, clients, rates...">
+            </div>
+            
+            <div class="user-dropdown">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar me-2">JD</div>
+                        <span class="d-none d-md-inline">John Doe</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Total Bookings</div>
+                    <div class="card-value">142</div>
+                </div>
+                <div class="dashboard-card success">
+                    <div class="card-icon">✅</div>
+                    <div class="card-title">Confirmed</div>
+                    <div class="card-value">128</div>
+                </div>
+                <div class="dashboard-card warning">
+                    <div class="card-icon">⏳</div>
+                    <div class="card-title">Pending</div>
+                    <div class="card-value">14</div>
+                </div>
+                <div class="dashboard-card danger">
+                    <div class="card-icon">💰</div>
+                    <div class="card-title">Revenue</div>
+                    <div class="card-value">₵125K</div>
+                </div>
+            </div>
+
+            <!-- Preview Message -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title">🎨 Professional Dashboard Design</h2>
+                    <p class="card-text text-muted">
+                        This is a complete, professional dashboard design combining the best Bootstrap templates:
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5>📱 Responsive</h5>
+                                <p class="small text-muted">Works perfectly on all devices</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5>🎯 Professional</h5>
+                                <p class="small text-muted">Clean, modern business design</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5>⚡ Functional</h5>
+                                <p class="small text-muted">Collapsible sidebar, search, dropdowns</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="footer-section">
+                            <h5>smartAd</h5>
+                            <p class="text-muted small">
+                                Empowering businesses with intelligent advertising campaign management.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="footer-section">
+                            <h5>Quick Links</h5>
+                            <ul>
+                                <li><a href="#">Dashboard</a></li>
+                                <li><a href="#">Bookings</a></li>
+                                <li><a href="#">Clients</a></li>
+                                <li><a href="#">Reports</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="footer-section">
+                            <h5>Support</h5>
+                            <ul>
+                                <li><a href="#">Help Center</a></li>
+                                <li><a href="#">Documentation</a></li>
+                                <li><a href="#">Contact Us</a></li>
+                                <li><a href="#">API Docs</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="footer-section">
+                            <h5>Newsletter</h5>
+                            <p class="text-muted small">Stay updated with our latest features.</p>
+                            <div class="newsletter-form">
+                                <input type="email" class="newsletter-input" placeholder="Enter email">
+                                <button class="newsletter-btn">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom">
+                    <p class="mb-0">&copy; 2025 smartAd. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+        
+        // Mobile sidebar toggle
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('show');
+            });
+        }
+    </script>
+</body>
+</html>

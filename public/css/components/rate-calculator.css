@@ -1,0 +1,354 @@
+/* Rate Calculator CSS - Two-Column Modal Layout */
+/* Location: public/css/components/rate-calculator.css */
+
+/* Calculator Grid Layout */
+.calculator-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2rem;
+    min-height: 700px;
+    max-height: 85vh;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+.calculator-config {
+    border-right: 1px solid #e2e8f0;
+    padding-right: 2rem;
+    overflow-y: auto;
+    max-height: 85vh;
+    padding-top: 0.5rem;
+}
+
+.calculator-results {
+    padding-left: 1.5rem;
+    overflow-y: auto;
+    max-height: 85vh;
+    padding-top: 0.5rem;
+}
+
+/* Form Styling */
+.calculator-config .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.calculator-config .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.85rem;
+}
+
+.calculator-config .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    min-height: 40px;
+}
+
+.calculator-config .form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.calculator-config .form-control:disabled {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.calculator-config .form-control:disabled::placeholder {
+    color: #d1d5db;
+}
+
+/* Result Sections */
+.result-section {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.result-section h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+}
+
+.result-row:last-child {
+    border-bottom: none;
+}
+
+.result-row.highlight {
+    font-weight: 600;
+    background: #eff6ff;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    border: 1px solid #dbeafe;
+}
+
+.result-row.total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0969da;
+    background: #dbeafe;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 2px solid #3b82f6;
+    margin-top: 0.75rem;
+}
+
+/* Action Buttons */
+.calculator-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.calculator-actions .btn {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.calculator-actions .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Tax Calculations */
+.tax-calculation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+}
+
+.tax-calculation-item:last-child {
+    border-bottom: none;
+}
+
+.tax-name {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.8rem;
+}
+
+.tax-details {
+    text-align: right;
+}
+
+.tax-amount {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.8rem;
+}
+
+.tax-info {
+    display: block;
+    color: #6b7280;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}
+
+/* No Data State */
+.no-data {
+    color: #9ca3af;
+    font-style: italic;
+    text-align: center;
+    padding: 0.75rem;
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+/* Loading States */
+.calculating {
+    color: #6b7280 !important;
+    font-style: italic;
+}
+
+/* Modal Specific Styles */
+.rate-calculator-modal .modal-content {
+    min-width: 800px;
+    max-width: 1000px;
+}
+
+.rate-calculator-modal .modal-body {
+    padding: 0;
+    overflow: hidden;
+}
+
+.rate-calculator-modal .modal-footer {
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 0.75rem 1.5rem;
+}
+
+/* Button States */
+.btn-success:disabled {
+    background-color: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Discount Section */
+#discount_section {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+#discount_section h4 {
+    color: #92400e;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .calculator-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        min-height: auto;
+        padding: 1.5rem;
+    }
+    
+    .calculator-config {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding-right: 0;
+        padding-bottom: 2rem;
+        max-height: none;
+    }
+    
+    .calculator-results {
+        padding-left: 0;
+        max-height: none;
+    }
+    
+    .rate-calculator-modal .modal-content {
+        min-width: auto;
+        width: 95vw;
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .calculator-grid {
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+    
+    .calculator-config {
+        padding-bottom: 1.5rem;
+    }
+    
+    .result-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .result-row {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+    
+    .result-row.total {
+        font-size: 1.25rem;
+        padding: 1rem;
+    }
+    
+    .tax-calculation-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .tax-details {
+        text-align: left;
+        width: 100%;
+    }
+    
+    .rate-calculator-modal .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .rate-calculator-modal .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* Animation Classes */
+.calculator-fade-in {
+    animation: calculatorFadeIn 0.3s ease;
+}
+
+@keyframes calculatorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus States for Accessibility */
+.calculator-config .form-control:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .result-section {
+        border: 2px solid #000;
+    }
+    
+    .result-row.highlight {
+        border: 2px solid #000;
+    }
+    
+    .result-row.total {
+        border: 3px solid #000;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .calculator-config .form-control,
+    .result-section,
+    .tax-calculation-item {
+        transition: none;
+    }
+    
+    .calculator-fade-in {
+        animation: none;
+    }
+}

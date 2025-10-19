@@ -1,0 +1,46 @@
+# --- SECURITY FIRST ---
+# Disable directory browsing.
+Options -Indexes
+
+# Set default directory index
+DirectoryIndex index.php
+
+# Deny access to all hidden files (like .git, .env) that might be here.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# --- URL REWRITING (FRONT CONTROLLER) ---
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /smartAd/public/
+
+    # Redirect Trailing Slashes to the non-slash URL.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ $1 [L,R=301]
+
+    # Silently map requests for /pages/... to the actual app/pages/... directory.
+    RewriteRule ^pages/(.*)$ ../app/pages/$1 [L]
+
+    # Silently map requests for /api/... to the actual app/api/... directory.
+    RewriteRule ^api/(.*)$ ../app/api/$1 [L]
+
+    # If a request is not for a real file or directory, and wasn't handled
+    # by the rules above, route it through index.php.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# --- WORLD-CLASS SECURITY HEADERS ---
+<IfModule mod_headers.c>
+    # Prevent browsers from guessing content types (MIME sniffing).
+    Header set X-Content-Type-Options "nosniff"
+    # Prevent the site from being rendered in an iframe (clickjacking protection).
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # CORRECTED Content Security Policy
+    # This allows resources from our own domain ('self') and whitelists the
+    # specific inline script used to set the baseUrl for JavaScript.
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+</IfModule>
